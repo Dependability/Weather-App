@@ -14,9 +14,12 @@ const locationInput = document.querySelector("input#location");
 const submitBtn = document.querySelector("button");
 const form = document.querySelector("form");
 const system = document.querySelector("#system");
+const date = document.querySelector('.date')
 
 const body = document.querySelector('body');
-const img = document.querySelector("img")
+const img = document.querySelector("img");
+const loading = document.querySelector('.loading-wrapper');
+const errors = document.querySelector('.errors');
 
 function decipherWeather(weatherJSON) {
     console.log(weatherJSON)
@@ -38,15 +41,18 @@ function capitalize(str) {
     return str.toLowerCase().charAt(0).toUpperCase() + str.toLowerCase().substring(1);
 }
 function getWeather(city, units="imperial") {
+
     //Would be the loading component
     console.log("Starting...")
-    
+    loading.classList.remove('hide')
+
     fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APPID}&units=${units}`)
     .then(function(value) {
         return value.json();
     })
     .then(function(value) {
         //Remove loading component.
+        loading.classList.add('hide')
         console.log("Completed.")
         if (value.cod === 200) {
             console.log(value);
@@ -55,8 +61,9 @@ function getWeather(city, units="imperial") {
             displayWeather(decipherWeather(value))
         }
         else {
+            errors.textContent = 'Please enter valid location';
+            errors.classList.remove('hide')
 
-            console.log("Incorrect input.")
         }
 
         
@@ -69,7 +76,9 @@ function displayWeather(info) {
     tempElem.textContent = `${Math.round(info.temp)}${units == "metric" ? "°C" : "°F"}`;
     placeElem.textContent = info.name;
     weatherDetail.textContent = capitalize(info.weather);
+    date.textContent = (new Date()).toLocaleDateString()
     console.log(info["main-weather"])
+    console.log(new Date())
 
     switch (info["main-weather"]) {
         case "Thunderstorm":
@@ -118,6 +127,7 @@ getWeather(currentCity, units);
 
 
 function eventFunction(e) {
+    errors.classList.add('hide');
     currentCity = locationInput.value;
     getWeather(currentCity, units);
     e.preventDefault();
